@@ -57,9 +57,11 @@ function main {
   # "/var/log/riak" "exec /usr/sbin/riak console"
   riak start
 
+  echo "riak started"
+
   sleep 10
   # Join node to the cluster
-  if /usr/local/bin/etcdctl ls /riak/machines | grep -v $RIAK_IPV4 ;
+  if /usr/local/bin/etcdctl ls /riak/machines 3>&1 1>&2 2>&3 | grep -v $RIAK_IPV4 | grep -v Error;
     then
     IP=$(/usr/local/bin/etcdctl ls /riak/machines | grep -v $RIAK_IPV4 | cut -f4 -d"/" | sort -R | head -n 1)
     riak-admin cluster join "riak@$IP" > /dev/null 2>&1;
@@ -67,6 +69,7 @@ function main {
     riak-admin cluster plan > /dev/null 2>&1 && riak-admin cluster commit > /dev/null 2>&1;
   fi
 
+  tail -f /var/log/riak/erlang.log.*
 }
 
 main
