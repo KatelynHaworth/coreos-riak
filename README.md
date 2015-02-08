@@ -21,9 +21,31 @@ MachineMetadata=type=riak
 Run Service (riak@.service)
 ```
 
+[Unit]
+After=install-riak.service
+After=docker.service
+Description=Service: Riak
+Requires=install-riak.service
+Requires=docker.service
+Wants=riak-discovery@%i.service
+
+[Service]
+User=core
+TimeoutStartSec=0
+KillMode=none
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill %p-%i
+ExecStartPre=-/usr/bin/docker rm %p-%i
+ExecStart=/usr/bin/docker run --name %p-%i --net=host -v /var/lib/riak:/var/lib/riak -v /var/log/riak:/var/log/riak shaned2222/coreos-riak:latest
+ExecStop=/usr/bin/docker kill %p-%i
+Restart=always
+RestartSec=10s
+
+[X-Fleet]
+MachineMetadata=type=riak
+Conflicts=riak@*.service
 
 ```
-
 
 
 Etcd Bind Service (riak-discovery@.service)

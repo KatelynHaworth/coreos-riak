@@ -53,15 +53,17 @@ ENV RIAK_JAVASCRIPT_MAP_POOL_SIZE 8
 RUN sed -i.bak 's/main$/main universe/' /etc/apt/sources.list
 RUN apt-get update -qq && apt-get install -y software-properties-common && \
     apt-add-repository ppa:webupd8team/java -y && apt-get update -qq && \
-    echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections && \
-    apt-get install -y oracle-java7-installer
+    echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
 
-# Install Riak
+# riak script
 RUN curl https://packagecloud.io/install/repositories/basho/riak/script.deb | bash
-RUN apt-get install -y riak=${RIAK_VERSION}
 
-# Install envsubst for injecting ENV variables into riak config
-RUN apt-get install -y gettext
+# Install services
+RUN apt-get install -y \
+    riak=${RIAK_VERSION} \
+    gettext \
+    oracle-java7-installer
+
 
 # Install Etcdctl
 RUN curl -L https://github.com/coreos/etcd/releases/download/v0.4.5/etcd-v0.4.5-linux-amd64.tar.gz -o /tmp/etcd-v0.4.5-linux-amd64.tar.gz
@@ -87,4 +89,5 @@ EXPOSE 8098 8087
 # Add boot script
 ADD bin/boot /bin/
 RUN chmod 755 /bin/boot
+
 CMD [ "/bin/boot" ]
