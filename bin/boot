@@ -8,7 +8,11 @@ function main {
 
   # configure Basho Riak
   export FQDN=$(hostname)
-  export RIAK_IPV4=$(ip -o -4 addr list eth1 | awk '{print $4}' | cut -d/ -f1)
+  if [[ -z $COREOS_PRIVATE_IPV4 ]]; then
+    export RIAK_IPV4=$COREOS_PRIVATE_IPV4
+  else
+    export RIAK_IPV4=$(ip -o -4 addr list eth1 | awk '{print $4}' | cut -d/ -f1)
+  fi
   export RIAK_HTTP_ADDR="${RIAK_IPV4}:8098"
   export RIAK_PROTOBUF_ADDR="${RIAK_IPV4}:8087"
   export RIAK_NODENAME="riak@${RIAK_IPV4}"
